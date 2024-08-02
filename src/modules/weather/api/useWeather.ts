@@ -1,5 +1,7 @@
 import {getConfig} from '@/modules/config';
 import {useQuery, UseQueryOptions} from '@/modules/query';
+import {useQueryClient} from '@tanstack/react-query';
+import {useEffect} from 'react';
 
 export type WeatherData = {
   coord: {
@@ -40,6 +42,7 @@ export type WeatherData = {
 };
 
 type GetWeatherResponse = {
+  cod: string;
   list: WeatherData[];
 };
 
@@ -48,28 +51,46 @@ type WeatherUnits = 'imperial' | 'metric';
 const getWeather = async (
   id: number[],
   units?: WeatherUnits,
-): Promise<GetWeatherResponse> => {
+): Promise<WeatherData[]> => {
   const url = new URL('https://api.openweathermap.org/data/2.5/group');
-  url.searchParams.set('id', id.join(','));
-  url.searchParams.set('appid', getConfig('OPEN_WEATHER_KEY'));
-  url.searchParams.set('units', units ?? ('metric' as WeatherUnits));
+  url.searchParams.append('id', id.join(','));
+  url.searchParams.append('appid', getConfig('OPEN_WEATHER_KEY'));
+  url.searchParams.append('units', units ?? ('metric' as WeatherUnits));
 
   const response = await fetch(url);
   const json = await response.json();
 
-  return json as GetWeatherResponse;
+  if (json.cod !== '200') {
+    // TODO: Better error handling
+    throw new Error('');
+  }
+
+  return (json as GetWeatherResponse).list;
 };
 
 export type UseWeatherOptions = Omit<
-  UseQueryOptions<GetWeatherResponse, Error, WeatherData>,
+  UseQueryOptions<WeatherData[], Error, WeatherData[]>,
   'queryKey' | 'queryFn'
 >;
 
 export const useWeather = (id: number[], options?: UseWeatherOptions) => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     ...options,
     queryKey: ['weather', id],
     queryFn: () => getWeather(id),
-    select: data => data.list,
   });
+  const {data} = query;
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    data.forEach(item => {
+      queryClient.setQueryData(['weather', [item.id]], () => [item]);
+    });
+  }, [queryClient, data]);
+
+  return query;
 };
