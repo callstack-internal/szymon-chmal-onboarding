@@ -12,11 +12,13 @@ const GetWeatherResponse = object({
 
 type GetWeatherResponse = InferOutput<typeof GetWeatherResponse>;
 
+export const GET_WEATHER_URL = 'https://api.openweathermap.org/data/2.5/group';
+
 const getWeather = async (
   id: number[],
   units?: WeatherUnits,
 ): Promise<WeatherData[]> => {
-  const url = new URL('https://api.openweathermap.org/data/2.5/group');
+  const url = new URL(GET_WEATHER_URL);
   url.searchParams.append('id', id.join(','));
   url.searchParams.append('appid', getConfig('OPEN_WEATHER_KEY'));
   url.searchParams.append('units', units ?? ('metric' as WeatherUnits));

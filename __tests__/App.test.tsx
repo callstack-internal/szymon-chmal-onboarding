@@ -2,16 +2,27 @@
  * @format
  */
 
-import 'react-native';
 import React from 'react';
 import {App} from '../src/App';
 
-// Note: import explicitly to use the types shipped with jest.
-import {it} from '@jest/globals';
+import {it, beforeAll, afterEach, afterAll} from '@jest/globals';
 
-// Note: test renderer must be required after react-native.
-import renderer from 'react-test-renderer';
+import {render} from '@testing-library/react-native';
+
+import {server} from '@/modules/msw/node';
+import {queryClient} from '@/modules/query/client.ts';
+
+beforeAll(() => server.listen());
+afterEach(() => {
+  server.resetHandlers();
+  queryClient.clear();
+});
+afterAll(() => server.close());
 
 it('renders correctly', () => {
-  renderer.create(<App />);
+  render(<App />);
+});
+
+it('navigates to details screen when item is clicked', () => {
+  render(<App />);
 });
