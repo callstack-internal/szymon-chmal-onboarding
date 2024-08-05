@@ -4,6 +4,7 @@ import {
   Pressable,
   RefreshControl,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {RootStackScreenProps} from '@/modules/navigation';
@@ -24,6 +25,7 @@ export const HomeScreen = ({
 }: HomeScreenProps): React.JSX.Element => {
   const userCities = useUserCities();
   const safeInsets = useSafeAreaInsets();
+  const {height, width} = useWindowDimensions();
   const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
   const {isRefreshing, onRefresh} = useRefreshControl(refetch);
 
@@ -41,6 +43,11 @@ export const HomeScreen = ({
       );
     },
     [navigation],
+  );
+
+  const keyExtractor = useCallback(
+    (item: WeatherData) => item.id.toString(),
+    [],
   );
 
   if (isLoading) {
@@ -67,6 +74,7 @@ export const HomeScreen = ({
   return (
     <FlashList
       renderItem={renderItem}
+      keyExtractor={keyExtractor}
       contentContainerStyle={{
         paddingLeft: safeInsets.left + 16,
         paddingTop: safeInsets.top,
@@ -76,6 +84,10 @@ export const HomeScreen = ({
       ItemSeparatorComponent={ItemSeparator}
       data={weatherData}
       estimatedItemSize={100}
+      estimatedListSize={{
+        height,
+        width,
+      }}
       refreshControl={
         <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
       }
