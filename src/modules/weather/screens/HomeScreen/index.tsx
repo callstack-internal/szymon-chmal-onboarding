@@ -38,7 +38,7 @@ export const HomeScreen = ({
           tempMin={item.main.temp_min}
           tempMax={item.main.temp_max}
           tempCurrent={item.main.temp}
-          onPress={() => navigation.push('Details', {cityId: item.id})}
+          onPress={() => navigation.push('Details', {weather: item})}
         />
       );
     },

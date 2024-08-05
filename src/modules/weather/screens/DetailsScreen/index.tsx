@@ -1,9 +1,7 @@
 import React from 'react';
-import {ActivityIndicator, ScrollView, Text, View} from 'react-native';
-import {useWeather} from '../../api/useWeather';
+import {ScrollView, Text, View} from 'react-native';
 import {RootStackScreenProps} from '@/modules/navigation';
 import {WeatherDetailListItem} from './WeatherDetailListItem';
-import {FullscreenDisclaimer} from '@/modules/components';
 
 export type DetailsScreenProps = RootStackScreenProps<'Details'>;
 
@@ -11,19 +9,8 @@ export const DetailsScreen = ({
   route,
 }: DetailsScreenProps): React.JSX.Element | null => {
   const {
-    params: {cityId},
+    params: {weather},
   } = route;
-  const {data} = useWeather([cityId]);
-
-  if (!data) {
-    return (
-      <FullscreenDisclaimer>
-        <ActivityIndicator />
-      </FullscreenDisclaimer>
-    );
-  }
-
-  const weather = data[0];
 
   return (
     <ScrollView className="flex-1">

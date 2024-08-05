@@ -1,7 +1,5 @@
 import {getConfig} from '@/modules/config';
 import {useQuery, UseQueryOptions} from '@/modules/query';
-import {useQueryClient} from '@tanstack/react-query';
-import {useEffect} from 'react';
 import {URL} from 'react-native-url-polyfill';
 
 export type WeatherData = {
@@ -75,23 +73,9 @@ export type UseWeatherOptions = Omit<
 >;
 
 export const useWeather = (id: number[], options?: UseWeatherOptions) => {
-  const queryClient = useQueryClient();
-  const query = useQuery({
+  return useQuery({
     ...options,
     queryKey: ['weather', id],
     queryFn: () => getWeather(id),
   });
-  const {data} = query;
-
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    data.forEach(item => {
-      queryClient.setQueryData(['weather', [item.id]], () => [item]);
-    });
-  }, [queryClient, data]);
-
-  return query;
 };
