@@ -77,7 +77,7 @@ export const HomeScreen = ({
       keyExtractor={keyExtractor}
       contentContainerStyle={{
         paddingLeft: safeInsets.left + 16,
-        paddingTop: safeInsets.top,
+        paddingTop: Math.max(safeInsets.top, 16),
         paddingRight: safeInsets.right + 16,
         paddingBottom: safeInsets.bottom + 16,
       }}
