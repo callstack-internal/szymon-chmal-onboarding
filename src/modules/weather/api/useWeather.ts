@@ -1,51 +1,16 @@
 import {getConfig} from '@/modules/config';
 import {useQuery, UseQueryOptions} from '@/modules/query';
 import {URL} from 'react-native-url-polyfill';
+import {WeatherData} from '../model/weather-data.ts';
+import {WeatherUnits} from '../model/weather-units.ts';
+import {array, object, parse, InferOutput, number} from 'valibot';
 
-export type WeatherData = {
-  coord: {
-    lon: number;
-    lat: number;
-  };
-  weather: {
-    id: string;
-    main: string;
-    description: string;
-    icon: string;
-  }[];
-  main: {
-    temp: number;
-    pressure: number;
-    humidity: number;
-    temp_min: number;
-    temp_max: number;
-    sea_level: number;
-    grnd_level: number;
-  };
-  wind: {
-    speed: number;
-    deg: number;
-  };
-  clouds: {
-    all: number;
-  };
-  rain: {
-    '3h': number;
-  };
-  snow: {
-    '3h': number;
-  };
-  dt: number;
-  id: number;
-  name: string;
-};
+const GetWeatherResponse = object({
+  cnt: number(),
+  list: array(WeatherData),
+});
 
-type GetWeatherResponse = {
-  cod: string;
-  list: WeatherData[];
-};
-
-type WeatherUnits = 'imperial' | 'metric';
+type GetWeatherResponse = InferOutput<typeof GetWeatherResponse>;
 
 const getWeather = async (
   id: number[],
@@ -58,13 +23,7 @@ const getWeather = async (
 
   const response = await fetch(url);
   const json = await response.json();
-
-  if (!('list' in json)) {
-    // TODO: Better error handling
-    throw new Error('');
-  }
-
-  return (json as GetWeatherResponse).list;
+  return parse(GetWeatherResponse, json).list;
 };
 
 export type UseWeatherOptions = Omit<
