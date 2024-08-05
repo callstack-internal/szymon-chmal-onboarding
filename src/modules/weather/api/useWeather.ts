@@ -2,6 +2,7 @@ import {getConfig} from '@/modules/config';
 import {useQuery, UseQueryOptions} from '@/modules/query';
 import {useQueryClient} from '@tanstack/react-query';
 import {useEffect} from 'react';
+import {URL} from 'react-native-url-polyfill';
 
 export type WeatherData = {
   coord: {
@@ -60,7 +61,7 @@ const getWeather = async (
   const response = await fetch(url);
   const json = await response.json();
 
-  if (json.cod !== '200') {
+  if (!('list' in json)) {
     // TODO: Better error handling
     throw new Error('');
   }
