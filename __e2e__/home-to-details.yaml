@@ -1,0 +1,8 @@
+appId: org.reactjs.native.example.SzymonChmalOnboarding
+---
+- launchApp
+- tapOn: Warsaw.*
+- assertVisible: "Details"
+- assertVisible: "Warsaw"
+- back
+- assertVisible: "Home"
