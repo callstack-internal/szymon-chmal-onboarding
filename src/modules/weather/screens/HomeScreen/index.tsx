@@ -1,5 +1,11 @@
 import React, {useCallback} from 'react';
-import {ActivityIndicator, Pressable, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from 'react-native';
 import {RootStackScreenProps} from '@/modules/navigation';
 import {useUserCities} from '../../persistence/useUserCities';
 import {WeatherListItem} from './WeatherListItem';
@@ -7,6 +13,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlashList, ListRenderItem} from '@shopify/flash-list';
 import {useWeather, WeatherData} from '../../api/useWeather';
 import {FullscreenDisclaimer} from '@/modules/components';
+import {useRefreshControl} from '@/modules/utils';
 
 export type HomeScreenProps = RootStackScreenProps<'Home'>;
 
@@ -18,6 +25,7 @@ export const HomeScreen = ({
   const userCities = useUserCities();
   const safeInsets = useSafeAreaInsets();
   const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
+  const {isRefreshing, onRefresh} = useRefreshControl(refetch);
 
   const renderItem = useCallback<ListRenderItem<WeatherData>>(
     ({item}) => {
@@ -63,11 +71,14 @@ export const HomeScreen = ({
         paddingLeft: safeInsets.left + 16,
         paddingTop: safeInsets.top,
         paddingRight: safeInsets.right + 16,
-        paddingBottom: safeInsets.bottom,
+        paddingBottom: safeInsets.bottom + 16,
       }}
       ItemSeparatorComponent={ItemSeparator}
       data={weatherData}
       estimatedItemSize={100}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      }
     />
   );
 };
