@@ -12,9 +12,10 @@ import {useUserCities} from '../../persistence/useUserCities';
 import {WeatherListItem} from './WeatherListItem';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlashList, ListRenderItem} from '@shopify/flash-list';
-import {useWeather, WeatherData} from '../../api/useWeather';
+import {useWeather} from '../../api/useWeather';
 import {FullscreenDisclaimer} from '@/modules/components';
 import {useRefreshControl} from '@/modules/utils';
+import {WeatherData} from '../../model/weather-data';
 
 export type HomeScreenProps = RootStackScreenProps<'Home'>;
 
