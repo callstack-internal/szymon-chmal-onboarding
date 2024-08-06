@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "e2e": "maestro test __e2e__/flow.yaml"
+    "e2e": "maestro test __e2e__/flow.yaml",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@react-navigation/native": "^6.1.18",
