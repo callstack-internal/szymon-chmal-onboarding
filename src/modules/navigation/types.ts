@@ -1,5 +1,5 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {WeatherData} from '../weather/api/useWeather';
+import {WeatherData} from '@/modules/weather';
 
 export type RootStackParamList = {
   Home: undefined;
