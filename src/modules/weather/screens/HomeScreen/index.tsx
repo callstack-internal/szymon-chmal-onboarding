@@ -51,13 +51,9 @@ export const HomeScreen = ({
       // eslint-disable-next-line react/no-unstable-nested-components
       headerRight: () => (
         <IconButton className="mt-1" onPress={onAddCityPress}>
-          <CirclePlus />
+          <CirclePlus color="black" />
         </IconButton>
       ),
-      headerSearchBarOptions: {
-        onChangeText: event => onSearch(event.nativeEvent.text),
-        hideWhenScrolling: false,
-      },
     });
   }, [navigation, onSearch, onAddCityPress]);
 

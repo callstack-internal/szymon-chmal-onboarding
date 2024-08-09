@@ -2,7 +2,6 @@ import React, {
   forwardRef,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -11,13 +10,53 @@ import {
   BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetView,
+  useBottomSheetInternal,
 } from '@gorhom/bottom-sheet';
-import {ActivityIndicator, Text, View} from 'react-native';
-import {useUserCities} from '../../persistence/useUserCities.ts';
-import {Button, Input} from '@/modules/components';
-import {useSearchCity} from '@/modules/weather/api/useSearchCity.ts';
-import {WeatherListItem} from '@/modules/weather/screens/HomeScreen/WeatherListItem.tsx';
+import {
+  ActivityIndicator,
+  NativeSyntheticEvent,
+  Text,
+  TextInputFocusEventData,
+  View,
+} from 'react-native';
+import {useBookmarkedCities} from '../../hooks/useBookmarkedCities';
+import {Button, Input, InputProps} from '@/modules/components';
+import {useSearchCity} from '../../api/useSearchCity';
+import {WeatherListItem} from './WeatherListItem';
 import {useDebouncedCallback} from '@/modules/utils';
+
+const CustomBottomSheetInput = ({onFocus, onBlur, ...other}: InputProps) => {
+  const {shouldHandleKeyboardEvents} = useBottomSheetInternal();
+
+  useEffect(() => {
+    return () => {
+      // Reset the flag on unmount
+      shouldHandleKeyboardEvents.value = false;
+    };
+  }, [shouldHandleKeyboardEvents]);
+
+  const handleOnFocus = useCallback(
+    (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      shouldHandleKeyboardEvents.value = true;
+      if (onFocus) {
+        onFocus(args);
+      }
+    },
+    [onFocus, shouldHandleKeyboardEvents],
+  );
+
+  const handleOnBlur = useCallback(
+    (args: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      shouldHandleKeyboardEvents.value = false;
+      if (onBlur) {
+        onBlur(args);
+      }
+    },
+    [onBlur, shouldHandleKeyboardEvents],
+  );
+
+  return <Input onFocus={handleOnFocus} onBlur={handleOnBlur} {...other} />;
+};
 
 const CustomBottomSheetBackdrop = (props: BottomSheetBackdropProps) => (
   <BottomSheetBackdrop disappearsOnIndex={-1} {...props} />
@@ -25,7 +64,7 @@ const CustomBottomSheetBackdrop = (props: BottomSheetBackdropProps) => (
 
 export const AddCityBottomSheetModal = forwardRef<BottomSheetModal, unknown>(
   function AddCityBottomSheetModal(_, ref) {
-    const {addCity} = useUserCities();
+    const {addCity} = useBookmarkedCities();
     const [searchValue, setSearchValue] = useState('');
     const modalRef = useRef<BottomSheetModal | null>(null);
     const {data, isLoading} = useSearchCity(searchValue, {
@@ -67,6 +106,9 @@ export const AddCityBottomSheetModal = forwardRef<BottomSheetModal, unknown>(
       <BottomSheetModal
         ref={handleRef}
         backdropComponent={CustomBottomSheetBackdrop}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="none"
+        android_keyboardInputMode="adjustResize"
         enableDynamicSizing
         onDismiss={onDismiss}>
         <BottomSheetView>
@@ -74,9 +116,10 @@ export const AddCityBottomSheetModal = forwardRef<BottomSheetModal, unknown>(
             <Text className="text-center mb-4">
               What's the city you want to add?
             </Text>
-            <Input
+            <CustomBottomSheetInput
               className="mb-4"
               rightAdornment={isLoading && <ActivityIndicator />}
+              autoFocus
               onChangeText={onSearch}
             />
 

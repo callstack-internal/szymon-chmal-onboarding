@@ -38,5 +38,6 @@ export const useWeather = (id: number[], options?: UseWeatherOptions) => {
     ...options,
     queryKey: ['weather', id],
     queryFn: () => getWeather(id),
+    enabled: id.length > 0,
   });
 };

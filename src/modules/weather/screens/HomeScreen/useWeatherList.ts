@@ -1,11 +1,11 @@
-import {
-  useUserCities,
-  UseUserCitiesReturn,
-} from '../../persistence/useUserCities.ts';
 import {useCallback, useMemo, useState} from 'react';
 import {useWeather} from '../../api/useWeather.ts';
-import {WeatherData} from '../../model/weather-data.ts';
+import {WeatherData} from '../../model/weather-data';
 import {useDebouncedCallback} from '@/modules/utils';
+import {
+  useBookmarkedCities,
+  UseBookmarkedCitiesReturn,
+} from '../../hooks/useBookmarkedCities';
 
 export type UseWeatherListReturn = {
   data: WeatherData[] | undefined;
@@ -13,12 +13,21 @@ export type UseWeatherListReturn = {
   refetch: () => Promise<unknown>;
   isLoading: boolean;
   onSearch: (text: string) => void;
-} & Pick<UseUserCitiesReturn, 'addCity' | 'removeCity'>;
+} & Pick<UseBookmarkedCitiesReturn, 'addCity' | 'removeCity'>;
 
 export const useWeatherList = (): UseWeatherListReturn => {
-  const {userCities, addCity, removeCity} = useUserCities();
+  const {data: userCities, addCity, removeCity} = useBookmarkedCities();
+  const userCitiesIds = useMemo(
+    () => userCities.map(city => city._id),
+    [userCities],
+  );
   const [searchTerm, setSearchTerm] = useState('');
-  const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
+  const {
+    data: weatherData,
+    error,
+    refetch,
+    isLoading,
+  } = useWeather(userCitiesIds);
 
   const data = useMemo(() => {
     if (searchTerm === '') {
