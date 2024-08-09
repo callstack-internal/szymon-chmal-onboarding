@@ -5,9 +5,15 @@ import {RootStackParamList} from './types';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
-export const RootNavigator = (): React.JSX.Element => {
+export type RootNavigatorProps = {
+  initialRouteName?: keyof RootStackParamList;
+};
+
+export const RootNavigator = ({
+  initialRouteName = 'Home',
+}: RootNavigatorProps): React.JSX.Element => {
   return (
-    <RootStack.Navigator initialRouteName="Home">
+    <RootStack.Navigator initialRouteName={initialRouteName}>
       <RootStack.Screen name="Home" component={HomeScreen} />
       <RootStack.Screen name="Details" component={DetailsScreen} />
     </RootStack.Navigator>

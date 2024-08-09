@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useLayoutEffect} from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -8,26 +8,42 @@ import {
   View,
 } from 'react-native';
 import {RootStackScreenProps} from '@/modules/navigation';
-import {useUserCities} from '../../persistence/useUserCities';
 import {WeatherListItem} from './WeatherListItem';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlashList, ListRenderItem} from '@shopify/flash-list';
-import {useWeather, WeatherData} from '../../api/useWeather';
 import {FullscreenDisclaimer} from '@/modules/components';
 import {useRefreshControl} from '@/modules/utils';
+import {WeatherData} from '../../model/weather-data';
+import {useWeatherList} from './useWeatherList.ts';
 
 export type HomeScreenProps = RootStackScreenProps<'Home'>;
 
 const ItemSeparator = () => <View className="h-4" />;
 
+const ListEmpty = () => (
+  <FullscreenDisclaimer>
+    <Text>No cities found.</Text>
+  </FullscreenDisclaimer>
+);
+
 export const HomeScreen = ({
   navigation,
 }: HomeScreenProps): React.JSX.Element => {
-  const userCities = useUserCities();
+  const {data, refetch, onSearch, isLoading, error} = useWeatherList();
   const safeInsets = useSafeAreaInsets();
   const {height, width} = useWindowDimensions();
-  const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
+
   const {isRefreshing, onRefresh} = useRefreshControl(refetch);
+
+  /** Show searchbar and wire it up */
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerSearchBarOptions: {
+        onChangeText: event => onSearch(event.nativeEvent.text),
+        hideWhenScrolling: false,
+      },
+    });
+  }, [navigation, onSearch]);
 
   const renderItem = useCallback<ListRenderItem<WeatherData>>(
     ({item}) => {
@@ -82,7 +98,8 @@ export const HomeScreen = ({
         paddingBottom: safeInsets.bottom + 16,
       }}
       ItemSeparatorComponent={ItemSeparator}
-      data={weatherData}
+      ListEmptyComponent={ListEmpty}
+      data={data}
       estimatedItemSize={100}
       estimatedListSize={{
         height,
@@ -91,6 +108,7 @@ export const HomeScreen = ({
       refreshControl={
         <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
       }
+      contentInsetAdjustmentBehavior="automatic"
     />
   );
 };

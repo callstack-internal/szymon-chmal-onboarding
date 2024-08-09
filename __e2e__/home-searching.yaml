@@ -1,0 +1,8 @@
+appId: org.reactjs.native.example.SzymonChmalOnboarding
+---
+- tapOn: "Search"
+- inputText: "Warsaw"
+- assertVisible: Warsaw.*
+- assertNotVisible: Sumy.*
+- tapOn: "Cancel"
+- assertVisible: Sumy.*

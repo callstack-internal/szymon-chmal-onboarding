@@ -22,6 +22,7 @@ export const WeatherListItem = ({
     <Pressable
       className="bg-white p-3 rounded-sm shadow flex-row justify-between"
       accessibilityLabel={`${cityName}, ${weather}, between ${tempMin}° and ${tempMax}°, currently ${tempCurrent}°, tap to show details`}
+      testID={`weather-${cityName}`}
       onPress={onPress}>
       <View className="justify-between">
         <Text className="text-xl">{cityName}</Text>
