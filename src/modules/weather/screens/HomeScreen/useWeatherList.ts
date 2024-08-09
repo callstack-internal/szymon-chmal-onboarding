@@ -3,6 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useWeather} from '../../api/useWeather.ts';
 import debounce from 'lodash/debounce';
 import {WeatherData} from '../../model/weather-data.ts';
+import {useLocalWeather} from '@/modules/weather/screens/HomeScreen/useLocalWeather.ts';
 
 const DEBOUNCE_TIME: number = 200;
 
@@ -17,15 +18,26 @@ export type UseWeatherListReturn = {
 export const useWeatherList = (): UseWeatherListReturn => {
   const userCities = useUserCities();
   const [searchTerm, setSearchTerm] = useState('');
+  const {data: localWeatherData} = useLocalWeather();
   const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
 
   const data = useMemo(() => {
-    if (searchTerm === '') {
-      return weatherData;
+    if (!weatherData) {
+      return undefined;
     }
 
-    return weatherData?.filter(item => item.name.includes(searchTerm));
-  }, [weatherData, searchTerm]);
+    let totalData = weatherData;
+
+    if (localWeatherData) {
+      totalData = [localWeatherData, ...totalData];
+    }
+
+    if (searchTerm === '') {
+      return totalData;
+    }
+
+    return totalData.filter(item => item.name.includes(searchTerm));
+  }, [weatherData, localWeatherData, searchTerm]);
 
   const debouncedOnSearch = useMemo(
     () =>

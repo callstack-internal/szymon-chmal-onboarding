@@ -92,10 +92,10 @@ export const HomeScreen = ({
       renderItem={renderItem}
       keyExtractor={keyExtractor}
       contentContainerStyle={{
-        paddingLeft: safeInsets.left + 16,
-        paddingTop: Math.max(safeInsets.top, 16),
-        paddingRight: safeInsets.right + 16,
-        paddingBottom: safeInsets.bottom + 16,
+        paddingLeft: 16,
+        paddingTop: 16,
+        paddingRight: 16,
+        paddingBottom: 16,
       }}
       ItemSeparatorComponent={ItemSeparator}
       ListEmptyComponent={ListEmpty}
