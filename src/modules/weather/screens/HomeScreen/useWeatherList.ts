@@ -1,10 +1,11 @@
-import {useUserCities} from '../../persistence/useUserCities.ts';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useWeather} from '../../api/useWeather.ts';
-import debounce from 'lodash/debounce';
-import {WeatherData} from '../../model/weather-data.ts';
-
-const DEBOUNCE_TIME: number = 200;
+import {WeatherData} from '../../model/weather-data';
+import {useDebouncedCallback} from '@/modules/utils';
+import {
+  useBookmarkedCities,
+  UseBookmarkedCitiesReturn,
+} from '../../hooks/useBookmarkedCities';
 
 export type UseWeatherListReturn = {
   data: WeatherData[] | undefined;
@@ -12,12 +13,21 @@ export type UseWeatherListReturn = {
   refetch: () => Promise<unknown>;
   isLoading: boolean;
   onSearch: (text: string) => void;
-};
+} & Pick<UseBookmarkedCitiesReturn, 'addCity' | 'removeCity'>;
 
 export const useWeatherList = (): UseWeatherListReturn => {
-  const userCities = useUserCities();
+  const {data: userCities, addCity, removeCity} = useBookmarkedCities();
+  const userCitiesIds = useMemo(
+    () => userCities.map(city => city._id),
+    [userCities],
+  );
   const [searchTerm, setSearchTerm] = useState('');
-  const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
+  const {
+    data: weatherData,
+    error,
+    refetch,
+    isLoading,
+  } = useWeather(userCitiesIds);
 
   const data = useMemo(() => {
     if (searchTerm === '') {
@@ -27,11 +37,7 @@ export const useWeatherList = (): UseWeatherListReturn => {
     return weatherData?.filter(item => item.name.includes(searchTerm));
   }, [weatherData, searchTerm]);
 
-  const debouncedOnSearch = useMemo(
-    () =>
-      debounce(setSearchTerm, DEBOUNCE_TIME, {leading: false, trailing: true}),
-    [],
-  );
+  const debouncedOnSearch = useDebouncedCallback(setSearchTerm, []);
 
   const onSearch = useCallback(
     (text: string) => {
@@ -47,19 +53,13 @@ export const useWeatherList = (): UseWeatherListReturn => {
     [debouncedOnSearch],
   );
 
-  /** Cancel debounced action on unmount */
-  useEffect(
-    () => () => {
-      debouncedOnSearch.cancel();
-    },
-    [debouncedOnSearch],
-  );
-
   return {
     data,
     error,
     refetch,
     isLoading,
     onSearch,
+    addCity,
+    removeCity,
   };
 };
