@@ -1,4 +1,7 @@
-import {useUserCities} from '../../persistence/useUserCities.ts';
+import {
+  useUserCities,
+  UseUserCitiesReturn,
+} from '../../persistence/useUserCities.ts';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useWeather} from '../../api/useWeather.ts';
 import debounce from 'lodash/debounce';
@@ -12,10 +15,10 @@ export type UseWeatherListReturn = {
   refetch: () => Promise<unknown>;
   isLoading: boolean;
   onSearch: (text: string) => void;
-};
+} & Pick<UseUserCitiesReturn, 'addCity' | 'removeCity'>;
 
 export const useWeatherList = (): UseWeatherListReturn => {
-  const userCities = useUserCities();
+  const {userCities, addCity, removeCity} = useUserCities();
   const [searchTerm, setSearchTerm] = useState('');
   const {data: weatherData, error, refetch, isLoading} = useWeather(userCities);
 
@@ -61,5 +64,7 @@ export const useWeatherList = (): UseWeatherListReturn => {
     refetch,
     isLoading,
     onSearch,
+    addCity,
+    removeCity,
   };
 };

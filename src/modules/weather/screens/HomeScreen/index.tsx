@@ -1,4 +1,4 @@
-import React, {useCallback, useLayoutEffect} from 'react';
+import React, {useCallback, useLayoutEffect, useRef} from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -11,10 +11,13 @@ import {RootStackScreenProps} from '@/modules/navigation';
 import {WeatherListItem} from './WeatherListItem';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {FlashList, ListRenderItem} from '@shopify/flash-list';
-import {FullscreenDisclaimer} from '@/modules/components';
+import {FullscreenDisclaimer, IconButton} from '@/modules/components';
 import {useRefreshControl} from '@/modules/utils';
 import {WeatherData} from '../../model/weather-data';
 import {useWeatherList} from './useWeatherList.ts';
+import {AddCityBottomSheetModal} from '@/modules/weather/screens/HomeScreen/AddCityBottomSheetModal.tsx';
+import {CirclePlus} from 'lucide-react-native';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 export type HomeScreenProps = RootStackScreenProps<'Home'>;
 
@@ -29,21 +32,34 @@ const ListEmpty = () => (
 export const HomeScreen = ({
   navigation,
 }: HomeScreenProps): React.JSX.Element => {
-  const {data, refetch, onSearch, isLoading, error} = useWeatherList();
+  const addCityModalRef = useRef<BottomSheetModal | null>(null);
+  const {data, refetch, onSearch, isLoading, error, removeCity} =
+    useWeatherList();
   const safeInsets = useSafeAreaInsets();
   const {height, width} = useWindowDimensions();
 
   const {isRefreshing, onRefresh} = useRefreshControl(refetch);
 
+  const onAddCityPress = useCallback(() => {
+    addCityModalRef.current?.present();
+  }, []);
+
   /** Show searchbar and wire it up */
   useLayoutEffect(() => {
     navigation.setOptions({
+      // Will not update options, safe to define component as inlined
+      // eslint-disable-next-line react/no-unstable-nested-components
+      headerRight: () => (
+        <IconButton className="mt-1" onPress={onAddCityPress}>
+          <CirclePlus />
+        </IconButton>
+      ),
       headerSearchBarOptions: {
         onChangeText: event => onSearch(event.nativeEvent.text),
         hideWhenScrolling: false,
       },
     });
-  }, [navigation, onSearch]);
+  }, [navigation, onSearch, onAddCityPress]);
 
   const renderItem = useCallback<ListRenderItem<WeatherData>>(
     ({item}) => {
@@ -55,10 +71,11 @@ export const HomeScreen = ({
           tempMax={item.main.temp_max}
           tempCurrent={item.main.temp}
           onPress={() => navigation.push('Details', {weather: item})}
+          onRemove={() => removeCity(item.id)}
         />
       );
     },
-    [navigation],
+    [navigation, removeCity],
   );
 
   const keyExtractor = useCallback(
@@ -88,27 +105,31 @@ export const HomeScreen = ({
   }
 
   return (
-    <FlashList
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      contentContainerStyle={{
-        paddingLeft: safeInsets.left + 16,
-        paddingTop: Math.max(safeInsets.top, 16),
-        paddingRight: safeInsets.right + 16,
-        paddingBottom: safeInsets.bottom + 16,
-      }}
-      ItemSeparatorComponent={ItemSeparator}
-      ListEmptyComponent={ListEmpty}
-      data={data}
-      estimatedItemSize={100}
-      estimatedListSize={{
-        height,
-        width,
-      }}
-      refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-      }
-      contentInsetAdjustmentBehavior="automatic"
-    />
+    <>
+      <FlashList
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        contentContainerStyle={{
+          paddingLeft: safeInsets.left + 16,
+          paddingTop: Math.max(safeInsets.top, 16),
+          paddingRight: safeInsets.right + 16,
+          paddingBottom: safeInsets.bottom + 16,
+        }}
+        ItemSeparatorComponent={ItemSeparator}
+        ListEmptyComponent={ListEmpty}
+        data={data}
+        estimatedItemSize={100}
+        estimatedListSize={{
+          height,
+          width,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+        contentInsetAdjustmentBehavior="automatic"
+      />
+
+      <AddCityBottomSheetModal ref={addCityModalRef} />
+    </>
   );
 };
