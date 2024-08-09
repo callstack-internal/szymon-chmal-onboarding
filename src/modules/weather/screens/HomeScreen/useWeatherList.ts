@@ -2,12 +2,10 @@ import {
   useUserCities,
   UseUserCitiesReturn,
 } from '../../persistence/useUserCities.ts';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useWeather} from '../../api/useWeather.ts';
-import debounce from 'lodash/debounce';
 import {WeatherData} from '../../model/weather-data.ts';
-
-const DEBOUNCE_TIME: number = 200;
+import {useDebouncedCallback} from '@/modules/utils';
 
 export type UseWeatherListReturn = {
   data: WeatherData[] | undefined;
@@ -30,11 +28,7 @@ export const useWeatherList = (): UseWeatherListReturn => {
     return weatherData?.filter(item => item.name.includes(searchTerm));
   }, [weatherData, searchTerm]);
 
-  const debouncedOnSearch = useMemo(
-    () =>
-      debounce(setSearchTerm, DEBOUNCE_TIME, {leading: false, trailing: true}),
-    [],
-  );
+  const debouncedOnSearch = useDebouncedCallback(setSearchTerm, []);
 
   const onSearch = useCallback(
     (text: string) => {
@@ -46,14 +40,6 @@ export const useWeatherList = (): UseWeatherListReturn => {
       }
 
       debouncedOnSearch(text);
-    },
-    [debouncedOnSearch],
-  );
-
-  /** Cancel debounced action on unmount */
-  useEffect(
-    () => () => {
-      debouncedOnSearch.cancel();
     },
     [debouncedOnSearch],
   );

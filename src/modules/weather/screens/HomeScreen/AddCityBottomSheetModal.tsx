@@ -14,10 +14,10 @@ import {
 } from '@gorhom/bottom-sheet';
 import {ActivityIndicator, Text, View} from 'react-native';
 import {useUserCities} from '../../persistence/useUserCities.ts';
-import debounce from 'lodash/debounce';
 import {Button, Input} from '@/modules/components';
 import {useSearchCity} from '@/modules/weather/api/useSearchCity.ts';
 import {WeatherListItem} from '@/modules/weather/screens/HomeScreen/WeatherListItem.tsx';
+import {useDebouncedCallback} from '@/modules/utils';
 
 const CustomBottomSheetBackdrop = (props: BottomSheetBackdropProps) => (
   <BottomSheetBackdrop disappearsOnIndex={-1} {...props} />
@@ -32,18 +32,7 @@ export const AddCityBottomSheetModal = forwardRef<BottomSheetModal, unknown>(
       enabled: searchValue !== '',
     });
 
-    const onSearch = useMemo(
-      () => debounce(setSearchValue, 200, {leading: false, trailing: true}),
-      [],
-    );
-
-    /** Clear debounce on unmount */
-    useEffect(
-      () => () => {
-        onSearch.cancel();
-      },
-      [onSearch],
-    );
+    const onSearch = useDebouncedCallback(setSearchValue, []);
 
     const handleRef = useCallback(
       (newRef: BottomSheetModal) => {
