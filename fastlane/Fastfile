@@ -1,0 +1,22 @@
+fastlane_version '2.53.1'
+
+before_all do
+  #ensure_git_branch
+  #ensure_git_status_clean
+  #git_pull
+end
+
+platform :android do
+  desc 'Build the Android application.'
+  lane :build do
+    if (ENV['APP_UPLOAD_STORE_PASSWORD'] && ENV['APP_UPLOAD_KEY_PASSWORD'])
+      properties = {
+        "APP_UPLOAD_STORE_PASSWORD" => ENV['APP_UPLOAD_STORE_PASSWORD'],
+        "APP_UPLOAD_KEY_PASSWORD" => ENV['APP_UPLOAD_KEY_PASSWORD']
+      }
+    end
+
+    gradle(task: 'clean', project_dir: 'android/',  properties: properties)
+    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/',  properties: properties)
+  end
+end
