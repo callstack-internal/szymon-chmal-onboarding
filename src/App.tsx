@@ -7,10 +7,11 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {RealmProvider} from '@realm/react';
 import {BookmarkedCity} from '@/modules/weather';
+import {StyleSheet} from 'react-native';
 
 export const App = (): React.JSX.Element => {
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={styles.root}>
       <MswProvider>
         <RealmProvider schema={[BookmarkedCity]}>
           <QueryClientProvider>
@@ -25,3 +26,9 @@ export const App = (): React.JSX.Element => {
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

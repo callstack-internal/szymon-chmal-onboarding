@@ -1,11 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {GestureResponderEvent, Pressable, Text, View} from 'react-native';
 import Swipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import {SharedValue, useAnimatedStyle} from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
-import {GestureEvent} from 'react-native-gesture-handler';
 
 export type WeatherListItemProps = {
   cityName: string;
